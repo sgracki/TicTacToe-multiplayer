@@ -3,6 +3,7 @@ const app = express();
 var http = require('http').Server(app);
 const mongoose = require('mongoose');
 var io = require('socket.io')(http);
+var path = require('path');
 
 var requestIp = require('request-ip');
 
@@ -14,6 +15,9 @@ mongoose.connection.on(`error`, () => {
     console.error(`MongoDB Connection Error. Please make sure that MongoDB is running.`);
 });
 mongoose.Promise = global.Promise;
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 io.on('connection', (socket) => {
     socket.emit('news', { hello: 'world' });
@@ -65,7 +69,9 @@ app.get('/', (req, res) => {
             var clientIp = requestIp.getClientIp(req);
 
             if(game.ips.indexOf(clientIp) > -1) {
-                return res.send("Hello world // gamesocket<3").status(200);
+                return res.render("index", {
+                    token: game.token
+                });
             } else {
                 game.ips.push(clientIp)
             }
@@ -73,7 +79,9 @@ app.get('/', (req, res) => {
             game.save(
                 (err) => {
                     if(!err) {
-                        return res.send("Hello world // gamesocket<3").status(200);
+                        return res.render("index", {
+                            token: game.token
+                        });
                     }
                 }
             )
