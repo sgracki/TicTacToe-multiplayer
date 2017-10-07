@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset='utf-8'>
+    <style>
+    .x0, .x1, .x2 {
+      width: 40px;
+      height: 40px;
+      border: black 1px solid;
+      float:left;
+      /*position: absolute;*/
+    }
+    .x0 {
+      border-top: none;
+
+    }
+    .x2 {
+      border-bottom: none;
+    }
+    .y0 {
+      border-left: none;
+    }
+    .y2 {
+      border-right: none;
+    }
+    #container {
+      width: 123px ;
+      height: 123px;
+    }
+
+  </style>
+  </head>
+  <body>
+    <div id='container'> </div>
+    <script>
+     var body = document.body;
+     class Board {
+       constructor() {
+         for(let i = 0; i < 3; i++) {
+          for(let j = 0; j < 3; j++) {
+            var s = document.createElement('div');
+            document.getElementById('container').appendChild(s);
+            //body.appendChild(s);
+            this.x = i;
+            this.y = j;
+            s.classList.add('x' + i.toString());
+            s.classList.add('y' + j.toString());
+            // s.style.top =50 + (15 * i) + 'px';
+            // s.style.left =50 + (15 * j) + 'px';
+            console.log('dupa');
+          }
+        }
+      }
+     }
+     var a = new Board();
+
+
+    </script>
+  </body>
+</html>
