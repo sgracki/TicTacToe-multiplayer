@@ -1,0 +1,1 @@
+supervisor -w models,app.js app.js
