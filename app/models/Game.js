@@ -2,7 +2,14 @@ var mongoose = require('mongoose');
 
 var GameSchema = new mongoose.Schema({
   token: String,
-  ips: [String],
+  players: [{
+    ip: String,
+    symbol: String,
+    start: Boolean
+  }],
+  moves: [],
+  finished: {type: Boolean, default: false},
+
   createdAt: Date
 });
 

@@ -19,12 +19,10 @@ mongoose.Promise = global.Promise;
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-io.on('connection', (socket) => {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', (data) => {
-        console.log(data);
-    });
-});
+function intBetween(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
 
 function makeid() {
     var text = "";
@@ -36,24 +34,76 @@ function makeid() {
     return text;
 }
 
-app.get('/', (req, res) => {
-    var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+class Room {
 
-    var clientIp = requestIp.getClientIp(req);
+    constructor() {
+        this.clientIp = requestIp.getClientIp(req);
+    }
 
-    if(!req.query.o) {
+    connect = (game) => {
+        io.on('connection', (socket) => {
+            socket.join(game.token)
+        });
+
+        return res.render("index", {
+            token: game.token
+        });
+    }
+
+    create() {
         var game = new Game({
             createdAt: new Date(),
             token: makeid(),
-            ips: []
+            players: [],
+            moves: []
         })
 
         game.save(
             (err) => {
                 if(!err) {
-                    game.ips.push(clientIp);
-                    res.redirect(`${fullUrl}?o=${game.token}`);
+                    io.on('connection', (socket) => {
+                        socket.join(game.token)
+                    });
+
+                    game.players.push({
+                        ip: this.clientIp,
+                        symbol: intBetween(0, 1) == 1 ? 'x' : 'o',
+                        start: intBetween(0, 1)
+                    });
                 }
+            }
+        )
+    }
+}
+
+app.put('/:token', (req, res) => {
+    Game.findOne({token: req.params.token}, (err, game) => {
+        if(err || !game) {
+            return res.sendStatus(404);
+        }
+
+        var move = req.body.move;
+
+        game.moves.push(move);
+
+        game.save(
+            (err) => {
+                if(!err) {
+                    io.to(game.token).emit('player moved:'+move.player);
+                    return res.send(game).status(200)
+                }
+            }
+        )
+    })
+})
+
+app.get('/', (req, res) => {
+    var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+
+    if(!req.query.o) {
+        Room.create(
+            (game) => {
+                res.redirect(`${fullUrl}?o=${game.token}`);
             }
         )
     } else {
@@ -69,9 +119,7 @@ app.get('/', (req, res) => {
             var clientIp = requestIp.getClientIp(req);
 
             if(game.ips.indexOf(clientIp) > -1) {
-                return res.render("index", {
-                    token: game.token
-                });
+                Room.connect(game);
             } else {
                 game.ips.push(clientIp)
             }
@@ -79,9 +127,7 @@ app.get('/', (req, res) => {
             game.save(
                 (err) => {
                     if(!err) {
-                        return res.render("index", {
-                            token: game.token
-                        });
+                        Room.connect(game);
                     }
                 }
             )
