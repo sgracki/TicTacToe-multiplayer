@@ -2,6 +2,7 @@
 <html lang="pl">
   <head>
     <meta charset='utf-8'>
+    <!-- <link rel="stylesheet" href="style.css" media="screen"> --> -->
     <style>
     .x0, .x1, .x2 {
       width: 40px;
@@ -30,6 +31,7 @@
 
   </style>
   </head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <body>
 
     <%- token %>
@@ -43,17 +45,28 @@
           for(let j = 0; j < 3; j++) {
             var s = document.createElement('div');
             document.getElementById('container').appendChild(s);
-            //body.appendChild(s);
             this.x = i;
             this.y = j;
             s.classList.add('x' + i.toString());
             s.classList.add('y' + j.toString());
-            // s.style.top =50 + (15 * i) + 'px';
-            // s.style.left =50 + (15 * j) + 'px';
-            console.log('dupa');
-          }
+            s.classList.add('material-icons')
+            s.dataset.player;
+            s.dataset.pressed = 0;
+            s.addEventListener("click", function(event) {
+            if(event.target.dataset.pressed == 0) {
+            event.target.innerHTML = s.dataset.status == "o" ? 'close' : 'close';
+            event.target.dataset.pressed = 1;
+            }
+            else {
+              event.target.innerHTML =  " ";
+              event.target.dataset.pressed = 0;
+            }
+          });
         }
       }
+      }
+
+
      }
      var a = new Board();
 
